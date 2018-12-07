@@ -11,11 +11,13 @@ class GoToStatement implements DialplanEntityInterface
 
     private $extension;
     private $priority;
+    private $context;
 
-    public function __construct(string $extension, string $priority)
+    public function __construct(string $priority, ?string $extension = null, ?string $context = null)
     {
-        $this->extension = $extension;
         $this->priority  = $priority;
+        $this->extension = $extension;
+        $this->context   = $context;
     }
 
     public function getName(): string
@@ -25,6 +27,6 @@ class GoToStatement implements DialplanEntityInterface
 
     public function __toString()
     {
-        return implode('|', [$this->extension, $this->priority]);
+        return implode('|', array_filter([$this->context, $this->extension, $this->priority]));
     }
 }

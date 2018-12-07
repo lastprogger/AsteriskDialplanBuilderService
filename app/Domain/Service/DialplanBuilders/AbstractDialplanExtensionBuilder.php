@@ -77,7 +77,10 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
 
         if ($this->nodeType === 'action' && !empty($this->relatedExtensions)) {
             $extension = array_pop($this->relatedExtensions)['extension'];
-            $this->exten->addPriority($this->dialplan->GoToStatement($extension->getName(), 'start'));
+            $context   = config('dialplan.default_context');
+            $this->exten->addPriority(
+                $this->dialplan->GoToStatement('start', $extension->getName(), $context)
+            );
         }
 
         return $this->exten;

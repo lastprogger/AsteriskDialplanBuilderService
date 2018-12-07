@@ -5,6 +5,7 @@ namespace Tests\Feature\Service\DialplanBuilders;
 
 
 use App\Domain\Models\Extension;
+use App\Domain\Models\PbxScheme;
 use App\Domain\Service\DialplanBuilders\DialplanBuilder;
 use App\Domain\Service\DialplanBuilders\DialplanStoreService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -13,7 +14,7 @@ use Tests\TestCase;
 
 class DialplanBuildAndStoreTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use  WithFaker;
 
     public function testDialplanBuildAndStoreAssertSuccess()
     {
@@ -36,6 +37,7 @@ class DialplanBuildAndStoreTest extends TestCase
                     'id'       => $dialNodeId,
                     'data'         => [
                         'endpoint' => '305',
+                        'music_on_hold' => 'default'
                     ],
                     'node_type' => [
                         'name' => 'Dial',
@@ -62,5 +64,9 @@ class DialplanBuildAndStoreTest extends TestCase
         $this->assertNotNull(Extension::where('app', 'Dial')->first());
         $this->assertNotNull(Extension::where('app', 'GoTo')->first());
         $this->assertNotNull(Extension::where('app', 'NoOp')->first());
+
+        $pbxScheme = PbxScheme::query()->first();
+
+        $this->assertNotNull($pbxScheme);
     }
 }
