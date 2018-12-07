@@ -54,4 +54,12 @@ class Priority
     {
         return $this->alias;
     }
+
+    /**
+     * @return string
+     */
+    public function toString(): string
+    {
+        return $this->getAlias() === null ? $this->getIndex() : $this->getIndex() . '(' . $this->getAlias() . ')';
+    }
 }

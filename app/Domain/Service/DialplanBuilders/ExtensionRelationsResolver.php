@@ -61,11 +61,17 @@ class ExtensionRelationsResolver
             /** @var DialplanExtensionBuilderInterface $relatedBuilder */
             $relatedBuilder = $this->buildersCollection->get($toNodeId);
             $extensionBuilder->addRelatedExtension($relatedBuilder->getExtension(), $type);
+            $extensionBuilder->getExtension()->setIsStarter($this->isStarterExtension($nodeId));
         }
     }
 
     private function getRelations(string $nodeId): array
     {
         return $this->mapRelations->whereIn('from_node_id', $nodeId)->all();
+    }
+
+    private function isStarterExtension(string $nodeId): bool
+    {
+        return $this->mapRelations->where('to_node_id', $nodeId)->first() === null;
     }
 }

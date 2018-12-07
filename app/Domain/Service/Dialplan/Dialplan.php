@@ -4,13 +4,19 @@
 namespace App\Domain\Service\Dialplan;
 
 
+use App\Domain\Service\Dialplan\Applications\Agi;
 use App\Domain\Service\Dialplan\Applications\AppOptionInterface;
+use App\Domain\Service\Dialplan\Applications\Authenticate;
+use App\Domain\Service\Dialplan\Applications\Curl;
 use App\Domain\Service\Dialplan\Applications\Dial;
 use App\Domain\Service\Dialplan\Applications\MixMonitor;
 use App\Domain\Service\Dialplan\Applications\NoOp;
 use App\Domain\Service\Dialplan\Applications\Playback;
+use App\Domain\Service\Dialplan\Applications\Set;
 use App\Domain\Service\Dialplan\Applications\StopMixMonitor;
+use App\Domain\Service\Dialplan\Statements\GoToIf;
 use App\Domain\Service\Dialplan\Statements\GoToStatement;
+use App\Domain\Service\Dialplan\Statements\ReturnStatement;
 
 class Dialplan
 {
@@ -18,9 +24,9 @@ class Dialplan
     private $extensions   = [];
 
 
-    public function createExtension(): Extension
+    public function createExtension(string $name = ''): Extension
     {
-        $extension = new Extension(uniqid());
+        $extension = new Extension($name?:uniqid());
         $this->extensions[] = $extension;
         return $extension;
     }
@@ -64,8 +70,38 @@ class Dialplan
         return new NoOp($text);
     }
 
-    public function GoToStatement(string $exten, string $priority): Statements\GoToStatement
+    public function GoToStatement(string $priority, ?string $exten = null, ?string $context = null): Statements\GoToStatement
     {
-        return new GoToStatement($exten, $priority);
+        return new GoToStatement($priority, $exten, $context);
+    }
+
+    public function Curl(string $url, array $postData = []): Applications\Curl
+    {
+        return new Curl($url, $postData);
+    }
+
+    public function Agi(string $command, array $args = []): Applications\Agi
+    {
+        return new Agi($command, $args);
+    }
+
+    public function Set(string $data): Applications\Set
+    {
+        return new Set($data);
+    }
+
+    public function GoToIf(string $condition, ?string $labelTrue = '', ?string $labelFalse = '')
+    {
+        return new GoToIf($condition, $labelTrue, $labelFalse);
+    }
+
+    public function Authenticate(string $password): Applications\Authenticate
+    {
+        return new Authenticate($password);
+    }
+
+    public function ReturnStatement(): Statements\ReturnStatement
+    {
+        return new ReturnStatement();
     }
 }

@@ -10,22 +10,17 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @property int    $id
- * @property string $context
- * @property string $exten
- * @property string $priority
- * @property string $app
- * @property string $appdata
- * @property string $company_id
  * @property string $pbx_scheme_id
+ * @property string $start_exten
  * @property Carbon $deleted_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-class Extension extends Model
+class PbxScheme extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'extensions';
+    protected $table = 'pbx_schemes';
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 

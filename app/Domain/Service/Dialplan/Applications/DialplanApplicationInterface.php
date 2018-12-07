@@ -14,15 +14,6 @@ use App\Domain\Service\Dialplan\DialplanEntityInterface;
 interface DialplanApplicationInterface extends DialplanEntityInterface
 {
     /**
-     * DialplanApplicationInterface constructor.
-     *
-     * @param null|string                $appData
-     * @param array|AppOptionInterface[] $options
-     * @param null|string                $command
-     */
-    public function __construct(?string $appData = null, ?array $options = [], ?string $command = null);
-
-    /**
      * @param array|AppOptionInterface[] $options
      *
      * @return DialplanApplicationInterface

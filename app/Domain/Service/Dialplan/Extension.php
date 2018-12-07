@@ -7,11 +7,15 @@ class Extension
     /**
      * @var string
      */
-    private $name;
+    protected $name;
     /**
      * @var array|Priority[]
      */
-    private $priorities = [];
+    protected $priorities = [];
+    /**
+     * @var bool
+     */
+    protected $isStarter = false;
 
     /**
      * Extension constructor.
@@ -55,4 +59,22 @@ class Extension
     {
         return count($this->priorities) + 1;
     }
+
+    /**
+     * @return bool
+     */
+    public function isStarter(): bool
+    {
+        return $this->isStarter;
+    }
+
+    /**
+     * @param bool $isStarter
+     */
+    public function setIsStarter(bool $isStarter): void
+    {
+        $this->isStarter = $isStarter;
+    }
+
+
 }
