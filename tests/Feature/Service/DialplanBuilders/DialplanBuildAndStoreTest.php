@@ -14,7 +14,8 @@ use Tests\TestCase;
 
 class DialplanBuildAndStoreTest extends TestCase
 {
-    use  WithFaker;
+    use DatabaseTransactions;
+    use WithFaker;
 
     public function testDialplanBuildAndStoreAssertSuccess()
     {

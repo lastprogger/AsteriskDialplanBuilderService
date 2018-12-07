@@ -6,4 +6,5 @@
     composer install
     php artisan migrate:refresh --seed
     php artisan migrate:refresh --env=testing
+    vendor/bin/phpunit
 @endtask
