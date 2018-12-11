@@ -3,7 +3,13 @@
 namespace App\Domain\Service\DialplanBuilders;
 
 use App\Domain\Service\Dialplan\Dialplan;
+use App\Domain\Service\DialplanBuilders\Exceptions\DialplanBuildException;
+use App\Domain\Service\DialplanBuilders\Exceptions\RelationCannotBeEstablishedException;
 use App\Domain\Service\DialplanBuilders\Factories\DialplanExtensionBuilderFactory;
+use App\Domain\Service\ExtensionStorageService;
+use Exception;
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Log;
 use SplQueue;
 
 class DialplanBuilder
@@ -20,6 +26,10 @@ class DialplanBuilder
      * @var ExtensionRelationsResolver
      */
     private $relationsResolver;
+    /**
+     * @var ExtensionStorageService
+     */
+    private $extensionsStorage;
 
     /**
      * DialplanBuilder constructor.
@@ -30,29 +40,39 @@ class DialplanBuilder
     {
         $this->dialplan          = new Dialplan();
         $this->relationsResolver = new ExtensionRelationsResolver($data['node_relations']);
+        $this->extensionsStorage = new ExtensionStorageService();
         $this->data              = $data;
     }
 
     /**
      * @return Dialplan
-     * @throws Exceptions\RelationCannotBeEstablishedException
-     * @throws Factories\Exceptions\UndefinedExtensionBuilderException
+     * @throws DialplanBuildException
      */
     public function build(): Dialplan
     {
-        $extenBuilders = [];
+        try {
 
-        foreach ($this->data['nodes'] as $nodeData) {
-            $extenBuilders[$nodeData['id']] = $this->makeExtensionBuilder($nodeData);
+            $extenBuilders = [];
+
+            foreach ($this->data['nodes'] as $nodeData) {
+                $extenBuilders[$nodeData['id']] = $this->makeExtensionBuilder($nodeData);
+            }
+
+            $this->relationsResolver->resolveAllRelations($extenBuilders);
+
+            foreach ($extenBuilders as $extenBuilder) {
+                $extenBuilder->build();
+            }
+
+            return $this->dialplan;
+
+        } catch (Exception $e) {
+            Log::error($e->getMessage(), [
+                'exception' => $e
+            ]);
+            $this->rollbackExtensionsReserve($extenBuilders);
+            throw new DialplanBuildException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->relationsResolver->resolveAllRelations($extenBuilders);
-
-        foreach ($extenBuilders as $extenBuilder) {
-            $extenBuilder->build();
-        }
-
-        return $this->dialplan;
     }
 
     /**
@@ -66,4 +86,13 @@ class DialplanBuilder
         return DialplanExtensionBuilderFactory::make($this->dialplan, $data);
     }
 
+    /**
+     * @param DialplanExtensionBuilderInterface[] $builders
+     */
+    private function rollbackExtensionsReserve(array $builders): void
+    {
+        collect($builders)->each(function(DialplanExtensionBuilderInterface $extensionBuilder){
+            $this->extensionsStorage->releaseReserve($extensionBuilder->getExtension()->getName());
+        });
+    }
 }

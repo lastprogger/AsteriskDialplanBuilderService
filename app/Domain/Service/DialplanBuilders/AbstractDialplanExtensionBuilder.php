@@ -71,7 +71,7 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
     public function build(): Extension
     {
         $text = 'Node ' . $this->data['id'] . ' is executing';
-        $this->exten->addPriority($this->dialplan->NoOp($text), 'start');
+        $this->exten->addPriority($this->dialplan->NoOp($text));
 
         $this->doBuild();
 

@@ -57,7 +57,7 @@ class Extension
      */
     private function getNextPriorityIndex(): int
     {
-        return count($this->priorities) + 1;
+        return count($this->priorities) + 2;
     }
 
     /**

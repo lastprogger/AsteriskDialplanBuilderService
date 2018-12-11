@@ -17,13 +17,12 @@ class BootstrapExtensionPreset extends Extension
 
         $agi  = $dialplan->Agi(config('dialplan.agi_call_setup_command'));
         $lang = $dialplan->Set('LANGUAGE()=${LANG}');
-        $auth = $dialplan->GoToIf('$[${AUTH}=1]', 'auth|auth|start');
+        $auth = $dialplan->GoToIf('$[${AUTH}=1]', 'auth,auth,start');
         $goTo = $dialplan->GoToStatement('start', '${START_EXTEN}', 'incom');
 
         $this->addPriority($agi);
         $this->addPriority($lang);
         $this->addPriority($auth);
         $this->addPriority($goTo);
-
     }
 }
