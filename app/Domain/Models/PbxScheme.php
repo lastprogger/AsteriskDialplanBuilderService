@@ -10,7 +10,9 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @property int    $id
+ * @property string $company_id
  * @property string $pbx_scheme_id
+ * @property string $pbx_id
  * @property string $start_exten
  * @property Carbon $deleted_at
  * @property Carbon $created_at

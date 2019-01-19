@@ -14,14 +14,14 @@ use App\Http\Controllers\Controller;
 |
 */
 
+
 Route::group(
     [
         'prefix'                          => '{version}',
         'namespace'                       => 'Api',
-        'middleware'                      => ['locale'],
         Controller::ACTION_GROUP_NAME_KEY => Controller::ACTION_GROUP_NAME_PUBLIC_API,
     ],
     function () {
-//        Route::resource('/some/url', 'controllerName');
+        Route::post('dialplan', 'DialplanController@store');
     }
 );

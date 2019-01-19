@@ -6,6 +6,8 @@ namespace App\Domain\Service\DialplanBuilders;
 
 use App\Domain\Service\Dialplan\Dialplan;
 use App\Domain\Service\Dialplan\Extension;
+use App\Domain\Service\Exceptions\NoFreeExtensionsForReserve;
+use App\Domain\Service\ExtensionStorageService;
 
 abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuilderInterface
 {
@@ -21,10 +23,7 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
      * @var array
      */
     protected $relatedExtensions = [];
-    /**
-     * @var array
-     */
-    protected $data;
+
     /**
      * @var string
      */
@@ -33,17 +32,26 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
      * @var string
      */
     protected $nodeType;
+    /**
+     * @var ExtensionStorageService
+     */
+    protected $extensionStorageService;
+
+    protected $buildContext;
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(Dialplan $dialplan, array $data)
-    {
-        $this->exten    = $dialplan->createExtension();
-        $this->dialplan = $dialplan;
-        $this->data     = $data;
-        $this->nodeId   = $data['id'];
-        $this->nodeType = $data['node_type']['type'];
+    public function __construct(
+        ExtensionStorageService $extensionStorageService,
+        Dialplan $dialplan,
+        BuildContext $buildContext
+    ) {
+        $this->dialplan                = $dialplan;
+        $this->extensionStorageService = $extensionStorageService;
+        $this->buildContext            = $buildContext;
+        $extenName                     = $this->extensionStorageService->allocateOne($buildContext->getPbxSchemeId());
+        $this->exten                   = $this->dialplan->createExtension($extenName);
     }
 
     /**
@@ -67,15 +75,18 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
 
     /**
      * {@inheritdoc}
+     * @throws NoFreeExtensionsForReserve
      */
-    public function build(): Extension
+    public function build(array $payload): Extension
     {
-        $text = 'Node ' . $this->data['id'] . ' is executing';
+        $this->nodeType = $payload['node_type']['type'];
+
+        $text = 'Node ' . $payload['id'] . ' is executing';
         $this->exten->addPriority($this->dialplan->NoOp($text));
 
-        $this->doBuild();
+        $this->doBuild($payload, $this->buildContext);
 
-        if ($this->nodeType === 'action' && !empty($this->relatedExtensions)) {
+        if ($payload['node_type']['type'] === 'action' && !empty($this->relatedExtensions)) {
             $extension = array_pop($this->relatedExtensions)['extension'];
             $context   = config('dialplan.default_context');
             $this->exten->addPriority(
@@ -87,7 +98,10 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
     }
 
     /**
+     * @param array        $payload
+     * @param BuildContext $buildContext
+     *
      * @return Extension
      */
-    abstract protected function doBuild(): Extension;
+    abstract protected function doBuild(array $payload, BuildContext $buildContext): Extension;
 }

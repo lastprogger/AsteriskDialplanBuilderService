@@ -4,7 +4,7 @@
     cd /var/www/AsteriskDialplanBuilderService
     git pull
     composer install
-    php artisan migrate:refresh --seed
+    php artisan migrate
     php artisan migrate:refresh --env=testing
     vendor/bin/phpunit
 @endtask

@@ -14,7 +14,7 @@ class DialplanExtensionsGenerate extends Command
      *
      * @var string
      */
-    protected $signature = 'command:DialplanExtensionsGenerate {amount}';
+    protected $signature = 'command:DialplanExtensionsGenerate {amount} {--testing}';
 
     /**
      * The console command description.
@@ -66,7 +66,10 @@ class DialplanExtensionsGenerate extends Command
             try {
                 $exten = uniqid();
                 $data  = $this->makeExtensionData($exten);
-                $this->writeToFile($data);
+
+                if (!$this->option('testing')) {dd('123');
+                    $this->writeToFile($data);
+                }
                 $this->storeExtension($exten);
                 $bar->advance();
                 ++$created;

@@ -3,47 +3,38 @@
 
 namespace App\Domain\Service\DialplanBuilders;
 
-
 use App\Domain\Service\Dialplan\Applications\Dial;
 use App\Domain\Service\Dialplan\Applications\Option;
 use App\Domain\Service\Dialplan\Dialplan;
 use App\Domain\Service\Dialplan\Extension;
+use App\Domain\Service\ExtensionStorageService;
 
 class DialNode extends AbstractDialplanExtensionBuilder
 {
-    private $endpoint;
-    private $limit;
-    private $musicOnHold;
-    private $needRecord;
 
-    public function __construct(Dialplan $dialplan, array $data)
+    protected function doBuild(array $payload, BuildContext $buildContext): Extension
     {
-        parent::__construct($dialplan, $data);
+        $appData     = $payload['data'];
+        $endpoint    = $appData['endpoint'];
+        $limit       = $appData['limit'] ?? null;
+        $musicOnHold = $appData['music_on_hold'] ?? null;
+        $needRecord  = $appData['need_record'] ?? true;
 
-        $appData           = $data['data'];
-        $this->endpoint    = $appData['endpoint'];
-        $this->limit       = $appData['limit'] ?? null;
-        $this->musicOnHold = $appData['music_on_hold'] ?? null;
-        $this->needRecord  = $appData['need_record'] ?? true;
-    }
-
-    protected function doBuild(): Extension
-    {
-        if ($this->needRecord === false) {
+        if ($needRecord === false) {
             $stopMixMonitorApp = $this->dialplan->StopMixMonitor();
             $this->exten->addPriority($stopMixMonitorApp);
         }
 
         $dialApp = $this->dialplan->Dial(
-            'SIP/' . $this->endpoint,
+            'SIP/' . $endpoint,
             [
                 new Option(Dial::OPT_DISALLOW_REDIRECT),
                 new Option(Dial::OPT_ALLOW_TRANSFER),
             ]
         );
 
-        if ($this->musicOnHold !== null) {
-            $dialApp->setOption(new Option(Dial::OPT_MUSIC_ON_HOLD, $this->musicOnHold));
+        if ($musicOnHold !== null) {
+            $dialApp->setOption(new Option(Dial::OPT_MUSIC_ON_HOLD, $musicOnHold));
         }
 
         $this->exten->addPriority($dialApp);

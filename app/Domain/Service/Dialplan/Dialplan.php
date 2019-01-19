@@ -20,7 +20,6 @@ use App\Domain\Service\Dialplan\Statements\ReturnStatement;
 
 class Dialplan
 {
-    private $dialplanData = [];
     private $extensions   = [];
 
 

@@ -4,16 +4,18 @@ namespace App\Domain\Service\DialplanBuilders;
 
 use App\Domain\Service\Dialplan\Dialplan;
 use App\Domain\Service\Dialplan\Extension;
+use App\Domain\Service\ExtensionStorageService;
 
 interface DialplanExtensionBuilderInterface
 {
     /**
      * DialplanExtensionBuilderInterface constructor.
      *
-     * @param Dialplan $dialplan
-     * @param array    $data
+     * @param ExtensionStorageService $extensionStorageService
+     * @param Dialplan                $dialplan
+     * @param BuildContext            $buildContext
      */
-    public function __construct(Dialplan $dialplan, array $data);
+    public function __construct(ExtensionStorageService $extensionStorageService, Dialplan $dialplan, BuildContext $buildContext);
 
     /**
      * @param Extension $extension
@@ -27,7 +29,9 @@ interface DialplanExtensionBuilderInterface
     public function getExtension(): Extension;
 
     /**
+     * @param array        $payload
+     *
      * @return Extension
      */
-    public function build(): Extension;
+    public function build(array $payload): Extension;
 }

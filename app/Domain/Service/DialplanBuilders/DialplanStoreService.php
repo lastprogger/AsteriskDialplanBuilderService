@@ -9,31 +9,48 @@ use App\Domain\Models\PbxScheme;
 use App\Domain\Service\Dialplan\Dialplan;
 use App\Domain\Service\Dialplan\Extension;
 use App\Domain\Service\DialplanBuilders\Exceptions\StoreDialplanException;
+use App\Domain\Service\ExtensionStorageService;
+use App\Domain\Service\SwitchPbxSchemeService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Log;
 
 class DialplanStoreService
 {
+    private $switchPbxSchemeService;
+    private $extensionStorageService;
+
+    public function __construct(
+        SwitchPbxSchemeService $switchPbxSchemeService,
+        ExtensionStorageService $extensionStorageService
+    ) {
+        $this->switchPbxSchemeService  = $switchPbxSchemeService;
+        $this->extensionStorageService = $extensionStorageService;
+    }
+
     /**
      * @param string   $companyId
+     * @param string   $pbxId
      * @param string   $pbxSchemeId
      * @param Dialplan $dialplan
      *
      * @throws StoreDialplanException
      */
-    public function storeDialplan(string $companyId, string $pbxSchemeId, Dialplan $dialplan): void
+    public function storeDialplan(string $companyId, string $pbxId, string $pbxSchemeId, Dialplan $dialplan): void
     {
         try {
             DB::beginTransaction();
+            $this->switchPbxSchemeService->deletePbx($pbxId);
 
             foreach ($dialplan->getExtensions() as $extension) {
                 $this->storeExtension('incom', $extension, $companyId, $pbxSchemeId);
 
                 if ($extension->isStarter()) {
-                    $pbxScheme = new PbxScheme();
+                    $pbxScheme                = new PbxScheme();
+                    $pbxScheme->pbx_id        = $pbxId;
+                    $pbxScheme->company_id    = $companyId;
                     $pbxScheme->pbx_scheme_id = $pbxSchemeId;
-                    $pbxScheme->start_exten = $extension->getName();
+                    $pbxScheme->start_exten   = $extension->getName();
                     $pbxScheme->save();
                 }
             }
@@ -42,6 +59,7 @@ class DialplanStoreService
         } catch (StoreDialplanException $e) {
             DB::rollBack();
             Log::error($e);
+            $this->rollbackExtensionsReserve($dialplan->getExtensions());
             throw new StoreDialplanException('Store dialplan error', 500, $e);
         }
     }
@@ -75,5 +93,17 @@ class DialplanStoreService
         } catch (Exception $e) {
             throw new StoreDialplanException('Store extension error', 500, $e);
         }
+    }
+
+    /**
+     * @param Extension[] $extensions
+     */
+    private function rollbackExtensionsReserve(array $extensions): void
+    {
+        collect($extensions)->each(
+            function (Extension $extension) {
+                $this->extensionStorageService->releaseReserve($extension->getName());
+            }
+        );
     }
 }

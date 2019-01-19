@@ -53,7 +53,7 @@ class ExtensionStorageService
     public function releaseReserveMany (array $extenList): void
     {
         $extenStorageList = ExtensionsStorage::query()->whereIn('exten', $extenList)->get();
-        $extenStorageList->each(function (ExtensionsStorage $extenStorage){
+        $extenStorageList->each(function (ExtensionsStorage $extenStorage) {
             $extenStorage->pbx_scheme_id = null;
             $extenStorage->free = true;
             $extenStorage->save();

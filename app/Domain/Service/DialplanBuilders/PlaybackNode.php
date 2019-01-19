@@ -3,26 +3,18 @@
 
 namespace App\Domain\Service\DialplanBuilders;
 
-
 use App\Domain\Service\Dialplan\Applications\Dial;
 use App\Domain\Service\Dialplan\Applications\Option;
 use App\Domain\Service\Dialplan\Dialplan;
 use App\Domain\Service\Dialplan\Extension;
+use App\Domain\Service\ExtensionStorageService;
 
 class PlaybackNode extends AbstractDialplanExtensionBuilder
 {
-    private $filename;
 
-    public function __construct(Dialplan $dialplan, array $data)
+    public function doBuild(array $payload, BuildContext $buildContext): Extension
     {
-        parent::__construct($dialplan, $data);
-
-        $this->filename = $data['data']['filename'];
-    }
-
-    public function doBuild(): Extension
-    {
-        $this->exten->addPriority($this->dialplan->Playback($this->filename));
+        $this->exten->addPriority($this->dialplan->Playback($payload['data']['filename']));
 
         return $this->exten;
     }

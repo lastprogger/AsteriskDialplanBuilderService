@@ -8,6 +8,8 @@ use App\Domain\Models\Extension;
 use App\Domain\Models\PbxScheme;
 use App\Domain\Service\DialplanBuilders\DialplanBuilder;
 use App\Domain\Service\DialplanBuilders\DialplanStoreService;
+use App\Domain\Service\ExtensionStorageService;
+use App\Domain\Service\SwitchPbxSchemeService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -23,32 +25,32 @@ class DialplanBuildAndStoreTest extends TestCase
         $dialNodeId     = $this->faker->uuid;
 
         $data = [
-            'nodes'     => [
+            'nodes'          => [
                 [
-                    'id'       => $playbackNodeId,
-                    'data'         => [
+                    'id'        => $playbackNodeId,
+                    'data'      => [
                         'filename' => 'helloworld',
                     ],
                     'node_type' => [
                         'name' => 'Playback',
                         'type' => 'action',
-                    ]
+                    ],
                 ],
                 [
-                    'id'       => $dialNodeId,
-                    'data'         => [
-                        'endpoint' => '305',
-                        'music_on_hold' => 'default'
+                    'id'        => $dialNodeId,
+                    'data'      => [
+                        'endpoint'      => '305',
+                        'music_on_hold' => 'default',
                     ],
                     'node_type' => [
                         'name' => 'Dial',
                         'type' => 'action',
-                    ]
+                    ],
                 ],
             ],
             'node_relations' => [
                 [
-                    'type'      => 'direct',
+                    'type'         => 'direct',
                     'from_node_id' => $playbackNodeId,
                     'to_node_id'   => $dialNodeId,
                 ],
@@ -56,10 +58,12 @@ class DialplanBuildAndStoreTest extends TestCase
         ];
 
         $dialplanBuilder = new DialplanBuilder($data);
-        $dialplan = $dialplanBuilder->build();
+        $dialplan        = $dialplanBuilder->build();
 
-        $store = new DialplanStoreService();
-        $store->storeDialplan($this->faker->uuid, $this->faker->uuid, $dialplan);
+        $store = new DialplanStoreService(
+            new SwitchPbxSchemeService(new ExtensionStorageService()), new ExtensionStorageService()
+        );
+        $store->storeDialplan($this->faker->uuid, $this->faker->uuid, $this->faker->uuid, $dialplan);
 
         $this->assertNotNull(Extension::where('app', 'Playback')->first());
         $this->assertNotNull(Extension::where('app', 'Dial')->first());

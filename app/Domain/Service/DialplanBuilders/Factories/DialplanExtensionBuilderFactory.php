@@ -3,10 +3,12 @@
 namespace App\Domain\Service\DialplanBuilders\Factories;
 
 use App\Domain\Service\Dialplan\Dialplan;
+use App\Domain\Service\DialplanBuilders\BuildContext;
 use App\Domain\Service\DialplanBuilders\DialNode;
 use App\Domain\Service\DialplanBuilders\DialplanExtensionBuilderInterface;
 use App\Domain\Service\DialplanBuilders\Factories\Exceptions\UndefinedExtensionBuilderException;
 use App\Domain\Service\DialplanBuilders\PlaybackNode;
+use App\Domain\Service\ExtensionStorageService;
 
 class DialplanExtensionBuilderFactory
 {
@@ -15,18 +17,25 @@ class DialplanExtensionBuilderFactory
         'playback' => PlaybackNode::class,
     ];
 
+    private static $extensionStorageService;
+
     /**
-     * @param Dialplan $dialplan
-     * @param array    $data
+     * @param Dialplan     $dialplan
+     * @param array        $data
+     * @param BuildContext $buildContext
      *
      * @return DialplanExtensionBuilderInterface
      * @throws UndefinedExtensionBuilderException
      */
-    static public function make(Dialplan $dialplan, array $data): DialplanExtensionBuilderInterface
+    static public function make(
+        Dialplan $dialplan,
+        array $data,
+        BuildContext $buildContext
+    ): DialplanExtensionBuilderInterface
     {
         $className = self::getClassName($data['node_type']['name']);
 
-        return new $className($dialplan, $data);
+        return new $className(self::getExtensionsStorage(), $dialplan, $buildContext);
     }
 
     /**
@@ -36,12 +45,12 @@ class DialplanExtensionBuilderFactory
      * @return array
      * @throws UndefinedExtensionBuilderException
      */
-    static public function makeMany(Dialplan $dialplan, array $data): array
+    static public function makeMany(Dialplan $dialplan, array $data, BuildContext $buildContext): array
     {
         $extensionBuilders = [];
 
         foreach ($data as $nodeData) {
-            $extensionBuilders[] = self::make($dialplan, $nodeData);
+            $extensionBuilders[] = self::make($dialplan, $nodeData, $buildContext);
         }
     }
 
@@ -60,5 +69,14 @@ class DialplanExtensionBuilderFactory
         }
 
         throw new UndefinedExtensionBuilderException('Extension builder for node "' . $name . '" not exist');
+    }
+
+    private static function getExtensionsStorage(): ExtensionStorageService
+    {
+        if (self::$extensionStorageService === null) {
+            self::$extensionStorageService = new ExtensionStorageService();
+        }
+
+        return self::$extensionStorageService;
     }
 }
