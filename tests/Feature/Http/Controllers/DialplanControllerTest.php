@@ -55,7 +55,7 @@ class DialplanControllerTest extends TestCase
                 ],
             ],
         ];
-
+dd(json_encode($data));
         $response = $this->json('POST', '/api/v1/dialplan', $data);
 
         $response->isOk();
