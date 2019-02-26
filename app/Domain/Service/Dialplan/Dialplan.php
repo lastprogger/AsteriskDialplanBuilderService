@@ -15,6 +15,7 @@ use App\Domain\Service\Dialplan\Applications\Playback;
 use App\Domain\Service\Dialplan\Applications\Set;
 use App\Domain\Service\Dialplan\Applications\StopMixMonitor;
 use App\Domain\Service\Dialplan\Statements\GoToIf;
+use App\Domain\Service\Dialplan\Statements\GoToIfTime;
 use App\Domain\Service\Dialplan\Statements\GoToStatement;
 use App\Domain\Service\Dialplan\Statements\ReturnStatement;
 
@@ -102,5 +103,15 @@ class Dialplan
     public function ReturnStatement(): Statements\ReturnStatement
     {
         return new ReturnStatement();
+    }
+
+    public function goToIfTime(
+        ?string $timeInterval,
+        ?string $weekDays,
+        ?string $monthDays,
+        ?string $month,
+        array $goTo
+    ): GoToIfTime {
+        return new GoToIfTime($timeInterval, $weekDays, $monthDays, $month, $goTo);
     }
 }

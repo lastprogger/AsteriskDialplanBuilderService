@@ -27,6 +27,6 @@ class GoToStatement implements DialplanEntityInterface
 
     public function __toString()
     {
-        return implode('|', array_filter([$this->context, $this->extension, $this->priority]));
+        return implode(',', array_filter([$this->context, $this->extension, $this->priority]));
     }
 }

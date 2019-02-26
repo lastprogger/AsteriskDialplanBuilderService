@@ -5,6 +5,11 @@ namespace App\Domain\Service\Dialplan\Statements;
 use App\Domain\Service\Dialplan\DialplanEntityInterface;
 use App\Domain\Service\Dialplan\Extension;
 
+/**
+ * Class GoToIf
+ *
+ * @@link http://asterisk.ru/knowledgebase/Asterisk%20cmd%20GotoIf
+ */
 class GoToIf implements DialplanEntityInterface
 {
     protected $name = 'GotoIf';

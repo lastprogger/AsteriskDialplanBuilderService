@@ -4,6 +4,8 @@ namespace App\Domain\Service\DialplanBuilders\Factories;
 
 use App\Domain\Service\Dialplan\Dialplan;
 use App\Domain\Service\DialplanBuilders\BuildContext;
+use App\Domain\Service\DialplanBuilders\CalendarNode;
+use App\Domain\Service\DialplanBuilders\Conditions\DialResultNode;
 use App\Domain\Service\DialplanBuilders\DialNode;
 use App\Domain\Service\DialplanBuilders\DialplanExtensionBuilderInterface;
 use App\Domain\Service\DialplanBuilders\Factories\Exceptions\UndefinedExtensionBuilderException;
@@ -15,6 +17,8 @@ class DialplanExtensionBuilderFactory
     private static $classMap = [
         'dial'     => DialNode::class,
         'playback' => PlaybackNode::class,
+        'calendar' => CalendarNode::class,
+        'dial_condition' => DialResultNode::class,
     ];
 
     private static $extensionStorageService;

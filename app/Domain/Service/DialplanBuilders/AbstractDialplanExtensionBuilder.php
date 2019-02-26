@@ -20,7 +20,7 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
      */
     protected $dialplan;
     /**
-     * @var array
+     * @var Extension[]
      */
     protected $relatedExtensions = [];
 
@@ -37,6 +37,9 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
      */
     protected $extensionStorageService;
 
+    /**
+     * @var BuildContext
+     */
     protected $buildContext;
 
     /**
@@ -67,10 +70,7 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
      */
     public function addRelatedExtension(Extension $extension, string $relationType): void
     {
-        $this->relatedExtensions[] = [
-            'extension' => $extension,
-            'type'      => $relationType,
-        ];
+        $this->relatedExtensions[$relationType] = $extension;
     }
 
     /**
@@ -86,8 +86,8 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
 
         $this->doBuild($payload, $this->buildContext);
 
-        if ($payload['node_type']['type'] === 'action' && !empty($this->relatedExtensions)) {
-            $extension = array_pop($this->relatedExtensions)['extension'];
+        if ($payload['node_type']['type'] === 'action' && isset($this->relatedExtensions['direct'])) {
+            $extension = $this->relatedExtensions['direct'];
             $context   = config('dialplan.default_context');
             $this->exten->addPriority(
                 $this->dialplan->GoToStatement('start', $extension->getName(), $context)
@@ -104,4 +104,19 @@ abstract class AbstractDialplanExtensionBuilder implements DialplanExtensionBuil
      * @return Extension
      */
     abstract protected function doBuild(array $payload, BuildContext $buildContext): Extension;
+
+    protected function getExtenIfPasses(): Extension
+    {
+        return $this->relatedExtensions['positive'] ?? null;
+    }
+
+    protected function getExtenIfDeclined(): Extension
+    {
+        return $this->relatedExtensions['negative'] ?? null;
+    }
+
+    protected function getDirectRelatedExten(): Extension
+    {
+        return $this->relatedExtensions['direct'] ?? null;
+    }
 }
