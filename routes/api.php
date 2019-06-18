@@ -25,5 +25,6 @@ Route::group(
         Route::post('dialplan', 'DialplanController@store');
         Route::get('/pbx-scheme/by-pbx-id/{pbxId}', 'PbxSchemeController@getByPbxId');
         Route::get('/pbx-scheme', 'PbxSchemeController@index');
+        Route::resource('sip-user', 'SipUserController');
     }
 );

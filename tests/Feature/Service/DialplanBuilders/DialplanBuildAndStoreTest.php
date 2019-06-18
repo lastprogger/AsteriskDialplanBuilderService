@@ -21,13 +21,76 @@ class DialplanBuildAndStoreTest extends TestCase
 
     public function testDialplanBuildAndStoreAssertSuccess()
     {
-        $playbackNodeId = $this->faker->uuid;
-        $dialNodeId     = $this->faker->uuid;
+        $playbackNodeId  = $this->faker->uuid;
+        $playbackNodeId2 = $this->faker->uuid;
+        $playbackNodeId3 = $this->faker->uuid;
+        $playbackNodeId4 = $this->faker->uuid;
+        $dialNodeId      = $this->faker->uuid;
+        $calendarlNodeId = $this->faker->uuid;
+        $dialCondlNodeId = $this->faker->uuid;
 
         $data = [
+            'company_id' => $this->faker->uuid,
+            'pbx_scheme_id' => $this->faker->uuid,
+            'pbx_id' => $this->faker->uuid,
             'nodes'          => [
                 [
+                    'id' => $calendarlNodeId,
+                    'data' => [
+                        [
+                            'time' => '00:00-23:59',
+                            'weekDays' => 'mon-fri'
+                        ]
+                    ],
+                    'node_type' => [
+                        'name' => 'calendar',
+                        'type' => 'condition'
+                    ]
+                ],
+                [
+                    'id' => $dialCondlNodeId,
+                    'data' => [
+                        [
+
+                        ]
+                    ],
+                    'node_type' => [
+                        'name' => 'dial_condition',
+                        'type' => 'condition'
+                    ]
+                ],
+                [
                     'id'        => $playbackNodeId,
+                    'data'      => [
+                        'filename' => 'helloworld',
+                    ],
+                    'node_type' => [
+                        'name' => 'Playback',
+                        'type' => 'action',
+                    ],
+                ],
+                [
+                    'id'        => $playbackNodeId2,
+                    'data'      => [
+                        'filename' => 'helloworld',
+                    ],
+                    'node_type' => [
+                        'name' => 'Playback',
+                        'type' => 'action',
+                    ],
+                ],
+                [
+                    'id'        => $playbackNodeId3,
+                    'data'      => [
+                        'filename' => 'monkeys',
+                    ],
+                    'node_type' => [
+                        'name' => 'Playback',
+                        'type' => 'action',
+                    ],
+                ],
+                [
+                    'id'        => $playbackNodeId4,
                     'data'      => [
                         'filename' => 'helloworld',
                     ],
@@ -50,9 +113,34 @@ class DialplanBuildAndStoreTest extends TestCase
             ],
             'node_relations' => [
                 [
+                    'type'         => 'positive',
+                    'from_node_id' => $calendarlNodeId,
+                    'to_node_id'   => $playbackNodeId,
+                ],
+                [
+                    'type'         => 'negative',
+                    'from_node_id' => $calendarlNodeId,
+                    'to_node_id'   => $playbackNodeId2,
+                ],
+                [
                     'type'         => 'direct',
                     'from_node_id' => $playbackNodeId,
                     'to_node_id'   => $dialNodeId,
+                ],
+                [
+                    'type'         => 'direct',
+                    'from_node_id' => $dialNodeId,
+                    'to_node_id'   => $dialCondlNodeId,
+                ],
+                [
+                    'type'         => 'negative',
+                    'from_node_id' => $dialCondlNodeId,
+                    'to_node_id'   => $playbackNodeId3,
+                ],
+                [
+                    'type'         => 'positive',
+                    'from_node_id' => $dialCondlNodeId,
+                    'to_node_id'   => $playbackNodeId4,
                 ],
             ],
         ];

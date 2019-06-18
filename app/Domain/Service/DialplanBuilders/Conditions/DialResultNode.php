@@ -18,7 +18,7 @@ class DialResultNode extends AbstractDialplanExtensionBuilder
 
         $goToIf = $this->dialplan->GoToIf
         (
-            '$[${DIALSTATUS}] = "ANSWER"',
+            '$[${DIALSTATUS} = "ANSWER"]',
             implode(',', ['start', $this->getExtenIfPasses()->getName(), config('dialplan.default_context')]),
             implode(',', ['start', $this->getExtenIfDeclined()->getName(), config('dialplan.default_context')])
         );
